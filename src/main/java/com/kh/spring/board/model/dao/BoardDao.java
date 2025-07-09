@@ -37,4 +37,10 @@ public interface BoardDao {
 
 	List<String> selectFileList();
 
+	Map<String, String> getBoardTypeMap();
+
+	
+
+	
+
 }

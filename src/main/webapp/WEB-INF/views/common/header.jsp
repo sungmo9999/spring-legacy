@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -84,23 +86,53 @@ height:80%; position:absolute; margin:auto; top:0px; bottom:0px; right:0px; left
 </head>
 <body>
 	<div id="header">
+	<c:set var="contextPath" value="${pageContext.request.contextPath}" scope="application" />
 		<div id="header_1">
 			<div id="header_1_left">
 				<img src="https://www.iei.or.kr/resources/images/main/main_renewal/top_logo.jpg" />
 			</div>
 			<div id="header_1_center">
 			</div>
+			
+			<c:set var="principal" value="${pageContext.request.userPrincipal }"/>
 			<div id="header_1_right">
-				<a href="${contextPath }/member/insert">회원가입</a>
+				<sec:authorize access="isAnonymous()">
+				<a href="${contextPath }/security/insert">회원가입</a>
 				<a href="${contextPath }/member/login">로그인</a>
+				</sec:authorize>
+				
+				<sec:authorize access="isAuthenticated()">
+				<span><sec:authentication property="principal.username"/>님
+                            환영합니다 ^^</span>
+                        <a href="${contextPath}/security/myPage"
+                            class="text-decoration-none text-secondary">마이페이지</a>
+                        <form:form action="${contextPath}/member/logout" method="post" style="display:inline;">
+                            <button type="submit"
+                                    class="border-0 bg-transparent text-secondary p-0 ml-2"
+                                    style="cursor:pointer;">
+                                로그아웃
+                            </button>
+                        </form:form>
+				</sec:authorize>
 			</div>
 		</div>
 		<div id="header_2">
 			<ul>
+				
+				<!-- 권한별 노출 url설정 -->
+				<sec:authorize access="hasRole('ROLE_USER')">
+				
 				<li><a href="${contextPath }">HOME</a></li>
 				<li><a href="${contextPath }/chat/chatRoomList">채팅</a></li>
-				<li><a href="${contextPath }/board/list/N">일반게시판</a></li>
-				<li><a href="${contextPath }/board/list/P">사진게시판</a></li>
+				<c:forEach var="map" items="${boardTypeMap }">
+					<li><a href="${contextPath }/board/list/${map.key}">${map.value.boardName}</a></li>
+				</c:forEach>
+				
+				
+				</sec:authorize>
+				<sec:authorize access="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+				<li><a>관리자</a></li>
+				</sec:authorize>
 			</ul>
 		</div>	
 	</div>
